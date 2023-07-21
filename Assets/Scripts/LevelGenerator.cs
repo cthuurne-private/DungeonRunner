@@ -26,7 +26,7 @@ public class LevelGenerator : MonoBehaviour
 
     private GameObject endRoom;
     private List<GameObject> layoutRoomObjects = new();
-
+    private List<GameObject> generatedOutlines = new();
     public RoomPrefabs rooms;
 
     private void Start()
@@ -56,6 +56,16 @@ public class LevelGenerator : MonoBehaviour
                 MoveGenerationPoint();
             }
         }
+
+        // Create room outlines
+        CreateRoomOutline(Vector3.zero);
+
+        foreach (var room in layoutRoomObjects)
+        {
+            CreateRoomOutline(room.transform.position);
+        }
+
+        CreateRoomOutline(endRoom.transform.position);
     }
 
     private void Update()
@@ -84,6 +94,110 @@ public class LevelGenerator : MonoBehaviour
                 break;
         }
     }
+
+    public void CreateRoomOutline(Vector3 roomPosition)
+    {
+        bool roomAbove = Physics2D.OverlapCircle(roomPosition + new Vector3(0f, yOffset, 0f), .2f, whatIsRoom);
+        bool roomBelow = Physics2D.OverlapCircle(roomPosition + new Vector3(0f, -yOffset, 0f), .2f, whatIsRoom);
+        bool roomLeft = Physics2D.OverlapCircle(roomPosition + new Vector3(-xOffset, 0f, 0f), .2f, whatIsRoom);
+        bool roomRight = Physics2D.OverlapCircle(roomPosition + new Vector3(xOffset, 0f, 0f), .2f, whatIsRoom);
+
+        var directionCount = 0;
+        if (roomAbove)
+        {
+            directionCount++;
+        }
+
+        if (roomBelow)
+        {
+            directionCount++;
+        }
+
+        if (roomRight)
+        {
+            directionCount++;
+        }
+
+        if (roomLeft)
+        {
+            directionCount++;
+        }
+
+        switch (directionCount)
+        {
+            case 0:
+                Debug.LogError("Found no room exists!");
+                break;
+            case 1:
+                if (roomAbove)
+                {
+                    generatedOutlines.Add(Instantiate(rooms.singleUp, roomPosition, transform.rotation));
+                }
+                else if (roomBelow)
+                {
+                    generatedOutlines.Add(Instantiate(rooms.singleDown, roomPosition, transform.rotation));
+                }
+                else if (roomLeft)
+                {
+                    generatedOutlines.Add(Instantiate(rooms.singleLeft, roomPosition, transform.rotation));
+                }
+                else if (roomRight)
+                {
+                    generatedOutlines.Add(Instantiate(rooms.singleRight, roomPosition, transform.rotation));
+                }
+
+                break;
+            case 2:
+                if (roomAbove && roomBelow)
+                {
+                    generatedOutlines.Add(Instantiate(rooms.doubleUpDown, roomPosition, transform.rotation));
+                }
+                else if (roomLeft && roomRight)
+                {
+                    generatedOutlines.Add(Instantiate(rooms.doubleLeftRight, roomPosition, transform.rotation));
+                }
+                else if (roomAbove && roomRight)
+                {
+                    generatedOutlines.Add(Instantiate(rooms.doubleUpRight, roomPosition, transform.rotation));
+                }
+                else if (roomRight && roomBelow)
+                {
+                    generatedOutlines.Add(Instantiate(rooms.doubleDownRight, roomPosition, transform.rotation));
+                }
+                else if (roomBelow && roomLeft)
+                {
+                    generatedOutlines.Add(Instantiate(rooms.doubleDownLeft, roomPosition, transform.rotation));
+                }
+                else if (roomLeft && roomAbove)
+                {
+                    generatedOutlines.Add(Instantiate(rooms.doubleUpLeft, roomPosition, transform.rotation));
+                }
+
+                break;
+            case 3:
+                if (roomAbove && roomRight && roomBelow)
+                {
+                    generatedOutlines.Add(Instantiate(rooms.tripleUpRightDown, roomPosition, transform.rotation));
+                }
+                else if (roomRight && roomBelow && roomLeft)
+                {
+                    generatedOutlines.Add(Instantiate(rooms.tripleRightDownLeft, roomPosition, transform.rotation));
+                }
+                else if (roomBelow && roomLeft && roomAbove)
+                {
+                    generatedOutlines.Add(Instantiate(rooms.tripleDownLeftUp, roomPosition, transform.rotation));
+                }
+                else if (roomLeft && roomAbove && roomRight)
+                {
+                    generatedOutlines.Add(Instantiate(rooms.tripleLeftUpRight, roomPosition, transform.rotation));
+                }
+
+                break;
+            case 4:
+                generatedOutlines.Add(Instantiate(rooms.fourways, roomPosition, transform.rotation));
+                break;
+        }
+    }
 }
 
 [Serializable]
@@ -102,5 +216,6 @@ public class RoomPrefabs
         tripleUpRightDown,
         tripleRightDownLeft,
         tripleDownLeftUp,
-        tripleLeftUpRight;
+        tripleLeftUpRight,
+        fourways;
 }
