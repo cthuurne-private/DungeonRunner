@@ -20,6 +20,9 @@ public class EnemyController : MonoBehaviour
     public Transform firePoint;
     public float fireRate;
     private float fireCounter;
+    public float shootRange;
+
+    public SpriteRenderer theBody;
 
     private void Start()
     {
@@ -28,42 +31,54 @@ public class EnemyController : MonoBehaviour
 
     private void Update()
     {
-        if (Vector3.Distance(transform.position, PlayerController.Instance.transform.position) < rangeToChasePlayer)
+        if (theBody.isVisible && PlayerController.Instance.gameObject.activeInHierarchy)
         {
-            _moveDirection = PlayerController.Instance.transform.position - transform.position;
+            if (Vector3.Distance(transform.position, PlayerController.Instance.transform.position) < rangeToChasePlayer)
+            {
+                _moveDirection = PlayerController.Instance.transform.position - transform.position;
+            }
+            else
+            {
+                _moveDirection = Vector3.zero;
+            }
+
+            _moveDirection.Normalize();
+
+            theRb.velocity = _moveDirection * moveSpeed;
+
+            if (shouldShoot && Vector3.Distance(transform.position, PlayerController.Instance.transform.position) < shootRange)
+            {
+                fireCounter -= Time.deltaTime;
+
+                if (fireCounter <= 0)
+                {
+                    fireCounter = fireRate;
+                    Instantiate(bullet, firePoint.position, firePoint.rotation);
+                    AudioManager.Instance.PlaySFX(13);
+                }
+            }
         }
         else
         {
-            _moveDirection = Vector3.zero;   
+            theRb.velocity = Vector2.zero;
         }
-
-        _moveDirection.Normalize();
-
-        theRb.velocity = _moveDirection * moveSpeed;
 
         animator.SetBool("isMoving", _moveDirection != Vector3.zero);
-
-        if (shouldShoot)
-        {
-            fireCounter -= Time.deltaTime;
-
-            if (fireCounter <= 0 )
-            {
-                fireCounter = fireRate;
-                Instantiate(bullet, firePoint.position, firePoint.rotation);
-            }
-        }
     }
 
     public void DamageEnemy(int damage)
     {
         health -= damage;
 
+        AudioManager.Instance.PlaySFX(2);
+
         Instantiate(hitEffect, transform.position, transform.rotation);
 
         if (health <= 0)
         {
             Destroy(gameObject);
+
+            AudioManager.Instance.PlaySFX(1);
 
             var selectedSplatter = Random.Range(0, deathSplatters.Length);
             var rotation = Random.Range(0, 4);

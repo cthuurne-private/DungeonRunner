@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyBullet : MonoBehaviour
@@ -22,12 +20,13 @@ public class EnemyBullet : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if(other.tag == "Player")
+        if (other.tag == "Player")
         {
-
+            PlayerHealthController.Instance.DamagePlayer();
         }
 
         Destroy(gameObject);
+        AudioManager.Instance.PlaySFX(4);
     }
 
     private void OnBecameInvisible()
