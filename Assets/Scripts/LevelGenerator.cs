@@ -28,6 +28,8 @@ public class LevelGenerator : MonoBehaviour
     private List<GameObject> layoutRoomObjects = new();
     private List<GameObject> generatedOutlines = new();
     public RoomPrefabs rooms;
+    public RoomCenter centerStart, centerEnd;
+    public RoomCenter[] potentialCenters;
 
     private void Start()
     {
@@ -66,14 +68,40 @@ public class LevelGenerator : MonoBehaviour
         }
 
         CreateRoomOutline(endRoom.transform.position);
+
+        foreach (var outline in generatedOutlines)
+        {
+            var generateCenter = true;
+
+            if (outline.transform.position == Vector3.zero)
+            {
+                Instantiate(centerStart, outline.transform.position, transform.rotation).theRoom = outline.GetComponent<Room>();
+                generateCenter = false;
+            }
+
+            if (outline.transform.position == endRoom.transform.position)
+            {
+                Instantiate(centerEnd, outline.transform.position, transform.rotation).theRoom = outline.GetComponent<Room>();
+                generateCenter = false;
+            }
+
+            if (generateCenter)
+            {
+                var centerSelect = Random.Range(0, potentialCenters.Length);
+
+                Instantiate(potentialCenters[centerSelect], outline.transform.position, transform.rotation).theRoom = outline.GetComponent<Room>();
+            }
+        }
     }
 
     private void Update()
     {
+#if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.R))
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
+#endif
     }
 
     public void MoveGenerationPoint()
