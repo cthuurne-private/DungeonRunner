@@ -1396,7 +1396,7 @@ PrefabInstance:
       objectReference: {fileID: 3972831304681618563}
     - target: {fileID: 6544595919121503618, guid: 7e782db3ca0d4ba4b9c559653ee17c2c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: NewGame
+      value: Resume
       objectReference: {fileID: 0}
     - target: {fileID: 6544595919121503618, guid: 7e782db3ca0d4ba4b9c559653ee17c2c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
